@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/minke/Desktop/VsCode/DiplomaPrjct/backend/mlruns/1/models/m-a637def1805a4cb483ad78a07939d5de/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.5
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+    skops_trusted_types: null
+mlflow_version: 3.12.0
+model_id: m-a637def1805a4cb483ad78a07939d5de
+model_size_bytes: 3532495
+model_uuid: m-a637def1805a4cb483ad78a07939d5de
+prompts: null
+run_id: 67a45eda040443838a9fabff7d11d3e7
+utc_time_created: '2026-05-18 12:22:01.948473'
