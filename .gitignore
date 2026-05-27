@@ -26,6 +26,7 @@ dist-ssr
 .env
 backend/data/*.csv
 backend/app/.env
+*.zip
 
 __pycache__/
 *.pyc
