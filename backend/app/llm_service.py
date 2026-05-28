@@ -3,9 +3,12 @@ import os
 import requests
 import json
 from typing import List, Dict
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 

@@ -7,19 +7,24 @@ from datetime import datetime
 from app.scanner import start_recon_scan
 from app.ml_service import ml_risk_service
 from app.mitre_service import MitreService
-from app.graph_service import attack_graph
 from app.llm_service import (
     generate_attack_paths_with_llm,
     generate_full_report,
-    generate_intelligent_findings   # ← добавили
+    generate_intelligent_findings,
 )
+from app.cve_service import get_cve_data, summarize_cve_risk
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="ThreatScope", version="1.0")
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ScanRequest(BaseModel):
@@ -43,8 +48,27 @@ async def start_scan(request: ScanRequest):
         # MITRE
         scan_result = MitreService.enrich_scan_with_mitre(scan_result)
 
-        # LLM Findings (самое важное)
+        # LLM Findings
         scan_result["findings"] = generate_intelligent_findings(scan_result)
+
+        # CVE — берём технологии из заголовков сервера
+        technologies = []
+        server = scan_result.get("web", {}).get("server", "")
+        x_powered_by = scan_result.get("web", {}).get("x_powered_by", "")
+        if server and server != "Unknown":
+            technologies.append(server)
+        if x_powered_by and x_powered_by != "Unknown":
+            technologies.append(x_powered_by)
+
+        if technologies:
+            cve_data = get_cve_data(technologies)
+            scan_result["cve"] = {
+                "vulnerabilities": cve_data,
+                "summary": summarize_cve_risk(cve_data),
+            }
+            logger.info(f"CVE: найдено {len(cve_data)} уязвимостей")
+        else:
+            scan_result["cve"] = {"vulnerabilities": [], "summary": {"total": 0}}
 
         # Attack Paths
         scan_result.setdefault("proactive", {})
